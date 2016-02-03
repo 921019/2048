@@ -1,6 +1,5 @@
 
 /**
- * 生成订单
  * @author dongdong
  * @date 2016 2 5
  */
