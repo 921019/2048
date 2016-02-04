@@ -1,50 +1,308 @@
 <!DOCTYPE html>
 <html>
-
 	<head>
 		<meta charset="UTF-8">
-		<title>订单监控器</title>
-		<link rel="stylesheet" href="dist/css/bootstrap.css" />	
+		<title>儿灵思把</title>
+		<link rel="stylesheet" href="dist/css/bootstrap.css" />
 
-		<script src="js/socket.io.js" type="text/javascript" charset="utf-8"></script>
-		<script src="js/socket.client.js" type="text/javascript" charset="utf-8"></script>
 		<script src="js/jquery-1.11.2.min.js" type="text/javascript" charset="utf-8"></script>
 		<script src="dist/js/bootstrap.js" type="text/javascript" charset="utf-8"></script>
 	</head>
-		
+
+	<style type="text/css">
+		body{
+			margin: 0;
+			padding: 0;
+			text-align: center;
+		}
+		.Canvas{
+			border: 1px solid #eee;
+		}
+		.cz{
+			
+		}
+	</style>
+
 	<body>
-		
-	 <div class="container">
-      <h2>第<%= items.cate %>场</h2>
-      <table class="table table-striped table-bordered table-hover table-condensed">
-        <thead>
-          <tr>
-            <th>ID</th>
-				<th>节拍时间</th>
-				<th>当前价</th>
-				<th>品质（精品、普品）</th>
-				<th>订单</th>
-				<th>操作</th>
-          </tr>
-        </thead>
-        <tbody>
-        	
-          <% items.list.forEach(function(val){%>
-          <tr>
-           		<td><%= val.Pid %></td>
-				<td><%= val.EndTime %></td>
-				<td><%= val.DqPrice %></td>
-				<td><%= val.IsTop %></td>
-				<td>成功</td>
-				<td>
-					<a class="btn btn-sm btn-success">生成订单</a>
-				</td>
-          </tr>
-          <% }) %>
-          	
-        </tbody>
-      </table>
-    </div>
+		<canvas id="myCanvas" width="400" height="400" class="Canvas"></canvas>
+
+		<div class="cz">
+			<input type="button" class="btn" name="up" id="up" value="上" />
+			<input type="button" class="btn" name="down" id="down" value="下" />
+			<input type="button" class="btn" name="left" id="left" value="左" />
+			<input type="button" class="btn" name="right" id="right" value="右" />
+		</div>
 	</body>
 
 </html>
+
+<script type="text/javascript">
+
+	var width  = 400
+	var height = 400
+	var mapdata =[[0,0,0,0],  
+    			  [0,0,0,0],  
+        		  [0,0,0,0],  
+        		  [0,0,0,0]];
+    
+    var g = {
+    	status :1,
+    	over :0
+    }
+	var canvas=document.getElementById("myCanvas");
+	var w = width / 4 - 2; //容器宽度
+	var h = height / 4 - 2; //容器高度
+
+
+	var drowText = function() {
+		console.log(2)
+	}
+	
+	
+	//随机数
+	var fRandomBy = function(under, over) {
+		switch (arguments.length) {
+			case 1:
+				return parseInt(Math.random() * under + 1);
+			case 2:
+				return parseInt(Math.random() * (over - under + 1) + under);
+			default:
+				return 0;
+		}
+	}
+	
+	/**
+	 * 创建容器
+	 * @param {Object} x 容器偏移量
+	 * @param {Object} y 容器偏移量
+	 * @param {Object} xx终点x
+	 * @param {Object} yy终点y
+	 * @param {string} nr容器中显示的文字
+	 */
+	
+	function mkroom(x,y,xx,yy,nr) { 
+//		console.log("起点："+x+",起点："+y+",横坐标："+xx+",纵坐标："+yy)
+		var ctx=canvas.getContext("2d");
+		ctx.beginPath(); 
+		ctx.lineWidth = "3"; 
+		ctx.strokeStyle = "white"; 
+		ctx.fillStyle = "#F0AD4E"; 
+		
+		ctx.moveTo(x, y); 
+		ctx.lineTo(x, yy); 
+		ctx.lineTo(xx, yy); 
+		ctx.lineTo(xx,y);
+		ctx.closePath(); 
+		ctx.fill(); 
+		ctx.stroke(); 
+		
+		var pr = 8;
+		var lg = nr.toString().length;
+		if(lg>1){
+			pr = lg*6 + 5
+		}
+		
+		if(nr != 0){
+			ctx.font = "20pt Arial"; 
+			ctx.strokeText(nr, xx-w/2-pr, yy-h/2+8); 
+			ctx.stroke();
+		}
+	}
+	
+	
+					
+	/**
+	 * 重置画布效果
+	 * @param {Object} data 新的数据
+	 * @param {Object} rd   随机生成的数量
+	 */
+	var drowWg =  function(data,rd){
+		
+		console.log("初始化的："+data);
+		
+		
+		if(g.over == 1){
+			alert("gameover");
+			location.reload();
+			return false;
+		}
+		if(rd == true){
+			lx = fRandomBy(0,3);
+			ly = fRandomBy(0,3);
+			cx = fRandomBy(0,3);
+			cy = fRandomBy(0,3);
+		}
+		
+		if(lx == cx && ly == cy){
+			drowWg(data,rd)
+			return;
+		}
+		
+		var line = data.length;
+		for(var i = 0; i < line; i++){
+			var col = data.length;
+			var x = i * w + i * 2 + 1;//容器宽度
+			var xx = x + w - 1;
+			for(var j = 0; j < col; j++){
+				var y = j * h + j * 2 + 1;//容器高度
+				var yy = y + h - 1;
+				
+				//生成随机数
+				if(((i == lx && j == ly) || (i == cx && j == cy)) && rd == true){
+					data[i][j] = 2
+				}
+						
+				var	nr = data[i][j]; 
+//				mkroom(x,y,xx,yy,nr)
+//				console.log("起点："+x+",起点："+y+",横坐标："+xx+",纵坐标："+yy)
+			}
+		}
+		
+		//随机的两个位置
+		console.log(lx,ly,cx,cy)
+		
+		console.log("初始化后的："+data);
+		mapdata = data
+	}
+	
+	/**
+	 * 生成两个随机数组
+	 */
+	
+	 var getPosition = function(data) {
+      var arr = [];
+      for(var i=0; i<data.length; i++ ) {
+        for(var j=0; j< data[i].length; j++ ) {
+          if( data[i][j] === 0) {
+            arr.push({x:j, y:i});
+          };
+        };
+      };
+      
+     
+     var res = arr[ Math.floor( Math.random() * arr.length )];
+     console.log(res)
+   };
+   
+   console.log(Math.random());
+   getPosition(mapdata);
+    
+//  
+//	var randwz = function(data,2){
+//		var line = data.length;
+//		for(var i = 0; i < line; i++){
+//			var col = data.length;
+//			for(var j = 0; j < col; j++){
+//				
+//			}
+//		}
+//	}
+	
+//	test[Math.floor(Math.random()*test.length)
+	
+	 /**
+     * @desc 在二维数组的区间中水平方向是否全部为0
+     * @desc i明确了二维数组的位置， k为开始位置， j为结束为止
+     * */
+//	    no_block_horizontal: function(i, k, j) {
+//	      k++;
+//	      for( ;k<j; k++) {
+//	        if(this.map[i][k] !== 0)
+//	        return false;
+//	      };
+//	      return true;
+//	    };
+//	    //和上面一个方法一样，检测的方向是竖排;
+//	    no_block_vertical : function(i, k, j) {
+//	      var data = this.map;
+//	      k++;
+//	      for(; k<j; k++) {
+//	        if(data[k][i] !== 0) {
+//	          return false;
+//	        };
+//	      };
+//	      return true;
+//	    };
+	    
+	var horizontal = function(data,i,k,j){
+        for(var k = k;k<j; k++) {
+          if(data[i][k] !== 0)
+          return false;
+        };
+        return true;
+	}
+    
+    
+	/**
+	 * 重写数组偏移量并且渲染画布
+	 */
+	var newarray = function(data,type){
+		var line = data.length;
+		//上
+		if(type == 'up'){
+			for(var i = 0; i<line; i++){
+				var col = data[i].length;
+				
+				for(var j = 0; j < col; j++){
+					
+					if(data[i][j] !=0 ){
+						for(var k = 0; k < j; k++){
+							
+							if(data[i][k] == 0 && horizontal(data,i,k+1,j)){
+								data[i][k] =  data[i][j]; 
+							    data[i][j] =  0	
+							    break
+							}else if(data[i][k] != 0 && data[i][k] == data[i][j]){
+								data[i][k] +=  data[i][j];
+								data[i][j] = 0
+								break
+							}
+							
+						}
+					}
+					
+					
+				}
+			}
+			
+		//下
+		}else if(type == 'down'){
+			
+		//左
+		}else if(type == 'left'){
+			
+		//右
+		}else{
+			
+		}
+		console.log("操作后的：" + data);
+		console.log(data);
+		mapdata = data
+		return data;
+			
+	}
+//	drowWg(mapdata,true);
+	$(function(){
+		$('.btn').on('click',function(){
+			var type = $(this).attr('name');
+			var newdata = newarray(mapdata,type);
+			console.log(mapdata);
+			console.log(newdata);
+			drowWg(newdata);
+			//上
+//			if(type == 'up'){
+//				
+//			//下
+//			}else if(type == 'down'){
+//				
+//			//左
+//			}else if(type == 'left'){
+//				
+//			//右
+//			}else{
+//				
+//			}
+//			console.log(type)
+		})
+	})
+</script>
