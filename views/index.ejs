@@ -1,95 +1,50 @@
 <!DOCTYPE html>
 <html>
+
 	<head>
 		<meta charset="UTF-8">
-		<title>儿灵思把</title>
-		<link rel="stylesheet" href="dist/css/bootstrap.css" />
+		<title>订单监控器</title>
+		<link rel="stylesheet" href="dist/css/bootstrap.css" />	
 
+		<script src="js/socket.io.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/socket.client.js" type="text/javascript" charset="utf-8"></script>
 		<script src="js/jquery-1.11.2.min.js" type="text/javascript" charset="utf-8"></script>
 		<script src="dist/js/bootstrap.js" type="text/javascript" charset="utf-8"></script>
 	</head>
-
-	<style type="text/css">
-		body{
-			margin: 0;
-			padding: 0;
-			text-align: center;
-		}
-		.Canvas{
-			border: 1px solid #eee;
-		}
-		.cz{
-			
-		}
-	</style>
-
+		
 	<body>
-		<canvas id="myCanvas" width="400" height="400" class="Canvas"></canvas>
-
-		<div class="cz">
-			<input type="button" class="btn" name="up" id="up" value="上" />
-			<input type="button" class="btn" name="down" id="down" value="下" />
-			<input type="button" class="btn" name="left" id="left" value="左" />
-			<input type="button" class="btn" name="right" id="right" value="右" />
-		</div>
+		
+	 <div class="container">
+      <h2>第<%= items.cate %>场</h2>
+      <table class="table table-striped table-bordered table-hover table-condensed">
+        <thead>
+          <tr>
+            <th>ID</th>
+				<th>节拍时间</th>
+				<th>当前价</th>
+				<th>品质（精品、普品）</th>
+				<th>订单</th>
+				<th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+        	
+          <% items.list.forEach(function(val){%>
+          <tr>
+           		<td><%= val.Pid %></td>
+				<td><%= val.EndTime %></td>
+				<td><%= val.DqPrice %></td>
+				<td><%= val.IsTop %></td>
+				<td>成功</td>
+				<td>
+					<a class="btn btn-sm btn-success">生成订单</a>
+				</td>
+          </tr>
+          <% }) %>
+          	
+        </tbody>
+      </table>
+    </div>
 	</body>
 
 </html>
-
-<script type="text/javascript">
-
-	var width  = 400
-	var height = 400
-	var mapdata =[[0,0,0,0],  
-    			  [0,0,0,0],  
-        		  [0,0,0,0],  
-        		  [0,0,0,0]];
-        		  
-	var canvas=document.getElementById("myCanvas");
-	var w = width / 4 - 2; //容器宽度
-	var h = height / 4 - 2; //容器高度
-	
-	
-	/**
-	 * 创建容器
-	 * @param {Object} x 容器偏移量
-	 * @param {Object} y 容器偏移量
-	 * @param {Object} w 宽度
-	 * @param {Object} h 高度
-	 * @param {string} nr容器中显示的文字
-	 */
-	var mkroom = function(x,y,w,h,nr){
-		var ctx=canvas.getContext("2d");
-		ctx.fillStyle = "#F0AD4E"
-		ctx.textAlign = "center"
-		ctx.fillRect(x,y,w,h);
-	}
-	
-	/**
-	 * 重置画布效果
-	 * @param {Object} data 新的数据
-	 * @param {Object} rd   随机生成的数量
-	 */
-	var drowWg =  function(data,rd){
-		
-		if(rd != undefined){
-			
-		}
-		
-		var line = data.length;
-		for(var i = 0; i < line; i++){
-			var col = data.length;
-			var x = i * w + i * 2 + 1;//容器宽度
-			for(var j = 0; j < col; j++){
-				var y = j * h + j * 2 + 1;//容器高度
-				
-				var	nr = data[i][j];
-				mkroom(x,y,w,h,nr)
-				console.log("横坐标："+x+"纵坐标："+y)
-			}
-			
-		}
-	}
-	
-	drowWg(mapdata);
-</script>
